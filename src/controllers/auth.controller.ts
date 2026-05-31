@@ -37,7 +37,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     const sql = 'INSERT INTO users (fullname, username, email, password, verificationToken) VALUES (?, ?, ?, ?, ?)';
     const [result] = await pool.query<ResultSetHeader>(sql, [fullname, username, email, hashedPassword, verificationToken]); //
 
-    const verificationLink = process.env.PORT + `/api/auth/verify-email?token=${verificationToken}`; //
+    const verificationLink = `http://localhost:5001/api/auth/verify-email?token=${verificationToken}`;
 
     const mailOptions = {
       from: '"ChillFlix Streaming" <no-reply@chillflix.com>',
@@ -58,7 +58,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
     res.status(201).json({
       code: 201,
-      message: "User created successfully, validation email dispatched!",
+      message: "Akun berhasil dibuat, email verifikasi terkirim!",
       data: {
         userId: result.insertId
       }
@@ -68,7 +68,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     if (error.code === 'ER_DUP_ENTRY') {
       res.status(400).json({
         code: 400,
-        error: 'Email or username already registered.'
+        error: 'Email atau username sudah terdaftar'
       });
       return;
     }
@@ -126,13 +126,13 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     const user = rows[0];
 
     if (user.isVerified === 0) {
-      res.status(403).json({ code: 403, error: 'Please check your email and verify your account status before logging in.' });
+      res.status(403).json({ code: 403, error: 'Mohon periksa email dan verifikasi akun sebelum masuk.' });
       return;
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password); //
     if (!isPasswordValid) {
-      res.status(401).json({ code: 401, error: 'Invalid email or password parameters.' }); //
+      res.status(401).json({ code: 401, error: 'Email atau password salah' }); //
       return;
     }
 

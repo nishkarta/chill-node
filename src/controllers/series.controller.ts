@@ -46,7 +46,7 @@ export const getSeriesById = async (req: Request, res: Response): Promise<void> 
     );
 
     if (rows.length === 0) {
-      res.status(404).json({ code: 404, error: 'Series or movie not found.' });
+      res.status(404).json({ code: 404, error: 'Series/Film tidak ditemukan' });
       return;
     }
 
@@ -83,7 +83,7 @@ export const createSeries = async (req: Request, res: Response): Promise<void> =
 
     res.status(201).json({
       code: 201,
-      message: 'Series data successfully added!',
+      message: 'Series/Film berhasil ditambahkan',
       data: {
         insertedId: result.insertId
       }
@@ -91,34 +91,56 @@ export const createSeries = async (req: Request, res: Response): Promise<void> =
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ code: 400, error: 'Database statement failed (INSERT).' });
+    res.status(400).json({ code: 400, error: 'Gagal menambahkan Series/Film' });
   }
 };
 
 export const updateSeries = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { title, synopsys, isMovie, releaseDate, director, thumbnailUrl, rating } = req.body;
+    
+    const { title, synopsys, isMovie, releaseDate, director, rating } = req.body;
 
-    const sql = `
-      UPDATE series 
-      SET title = ?, synopsys = ?, isMovie = ?, releaseDate = ?, director = ?, thumbnailUrl = ?, rating = ?
-      WHERE id = ?
-    `;
+    let sql = 'UPDATE series SET ';
+    const queryParams: any[] = [];
 
-    const values = [title, synopsys, isMovie ? 1 : 0, releaseDate, director, thumbnailUrl, rating, id];
+    if (title !== undefined) { sql += 'title = ?, '; queryParams.push(title); }
+    if (synopsys !== undefined) { sql += 'synopsys = ?, '; queryParams.push(synopsys); }
+    if (isMovie !== undefined) { sql += 'isMovie = ?, '; queryParams.push(Number(isMovie)); }
+    if (releaseDate !== undefined) { sql += 'releaseDate = ?, '; queryParams.push(releaseDate); }
+    if (director !== undefined) { sql += 'director = ?, '; queryParams.push(director); }
+    if (rating !== undefined) { sql += 'rating = ?, '; queryParams.push(rating); }
 
-    const [result] = await pool.query<ResultSetHeader>(sql, values);
+    if (req.file) {
+      sql += 'thumbnailUrl = ?, ';
+      queryParams.push("/" +req.file.path);
+    }
+
+    if (queryParams.length === 0) {
+      res.status(400).json({ error: 'No fields provided for update.' });
+      return;
+    }
+    
+    sql = sql.slice(0, -2); 
+
+    sql += ' WHERE id = ?';
+    queryParams.push(id);
+
+    const [result] = await pool.query<ResultSetHeader>(sql, queryParams);
 
     if (result.affectedRows === 0) {
-      res.status(404).json({ coee: 404, error: 'No records updated. ID not found.' });
+      res.status(404).json({ error: 'Series tidak ditemukan' });
       return;
     }
 
-    res.status(200).json({ code: 200, message: 'Series updated successfully.' });
+    res.status(200).json({ message: 'Series/Film berhasil diperbarui' });
+    return;
+
   } catch (error) {
-    console.error(error);
-    res.status(400).json({ code: 400, error: 'Database statement failed (UPDATE).' });
+    console.error('❌ Error in updateSeries:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Internal system log error while altering row.' });
+    }
   }
 };
 
@@ -132,13 +154,13 @@ export const deleteSeries = async (req: Request, res: Response): Promise<void> =
     );
 
     if (result.affectedRows === 0) {
-      res.status(404).json({ code: 404, error: 'No records deleted. ID not found.' });
+      res.status(404).json({ code: 404, error: 'Series/Film tidak ditemukan' });
       return;
     }
 
-    res.status(200).json({ code: 200, message: 'Record deleted from database successfully.' });
+    res.status(200).json({ code: 200, message: 'Series/Film berhasil dihapus' });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ code: 400, error: 'Database statement failed (DELETE).' });
+    res.status(400).json({ code: 400, error: 'Penghapusan Series/Film gagal' });
   }
 };
