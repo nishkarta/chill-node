@@ -19,9 +19,9 @@ const transporter = nodemailer.createTransport({
 
 transporter.verify((error, success) => {
   if (error) {
-    console.error('❌ Nodemailer configuration error:', error);
+    console.error('Nodemailer configuration error:', error);
   } else {
-    console.log('📧 Nodemailer is ready to send secure messages!');
+    console.log('Nodemailer is ready to send secure messages!');
   }
 });
 
@@ -104,8 +104,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
       [users[0].id]
     );
 
-    // Success text response required by assignment slide
-    res.status(200).json({ code: 200, message: 'Email Verified Successfully' }); //
+    res.status(200).json({ code: 200, message: 'Email Verified Successfully' }); 
   } catch (error) {
     console.error(error);
     res.status(500).json({ code: 200, error: 'Token verification process failure.' });
@@ -114,12 +113,12 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
 
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, password } = req.body; //
+    const { username, password } = req.body; 
 
     const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM users WHERE username = ?', [username]);
 
     if (rows.length === 0) {
-      res.status(401).json({ error: 'Invalid email or password parameters.' }); //
+      res.status(401).json({ error: 'Invalid email or password parameters.' }); 
       return;
     }
 
@@ -130,9 +129,9 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password); //
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      res.status(401).json({ code: 401, error: 'Email atau password salah' }); //
+      res.status(401).json({ code: 401, error: 'Email atau password salah' });
       return;
     }
 

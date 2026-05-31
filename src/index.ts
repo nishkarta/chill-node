@@ -29,5 +29,5 @@ app.get('/', (req, res) => {
 app.use('/uploads', express.static('uploads'));
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server safely running on port ${PORT}`);
+  console.log(`Server safely running on port ${PORT}`);
 });
