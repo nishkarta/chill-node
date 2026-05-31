@@ -27,9 +27,12 @@ export const getAllSeries = async (req: Request, res: Response): Promise<void> =
 
     const [rows] = await pool.query<RowDataPacket[]>(sql, queryParams); res.status(200).json(rows);
     res.status(200).json({ code: 200, data: rows });
+    return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ code: 500, error: 'Failed to process scoped database parameters.' });
+    if(!res.headersSent){
+      res.status(500).json({ code: 500, error: 'Failed to process scoped database parameters.' });
+    }
   }
 };
 
@@ -48,9 +51,12 @@ export const getSeriesById = async (req: Request, res: Response): Promise<void> 
     }
 
     res.status(200).json({ code: 200, data: rows[0] });
+    return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ code: 500, error: 'Database query failed (SELECT BY ID).' });
+    if(!res.headersSent){
+      res.status(500).json({ code: 500, error: 'Database query failed (SELECT BY ID).' });
+    }
   }
 };
 
