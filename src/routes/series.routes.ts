@@ -8,11 +8,11 @@ import {
   updateSeries, 
   deleteSeries 
 } from '../controllers/series.controller.js';
+import { authorizeUser } from '../middlewares/auth.middleware.js';
 
-// Define where uploaded files should be stored and how they should be named
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Make sure you create an 'uploads' directory at your project root
+    cb(null, 'uploads/'); 
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -27,9 +27,9 @@ const router = Router();
 router.get('/', getAllSeries);
 router.get('/:id', getSeriesById);
 
-router.post('/', upload.single('thumbnail'), createSeries);
-router.patch('/:id', upload.single('thumbnail'), updateSeries);
+router.post('/',authorizeUser, upload.single('thumbnail'), createSeries);
+router.patch('/:id',authorizeUser, upload.single('thumbnail'), updateSeries);
 
-router.delete('/:id', deleteSeries);
+router.delete('/:id',authorizeUser, deleteSeries);
 
 export default router;
